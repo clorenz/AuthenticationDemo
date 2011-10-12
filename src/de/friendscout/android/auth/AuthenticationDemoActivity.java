@@ -27,11 +27,20 @@ import com.google.api.services.plus.model.Person;
  * @see http://www.androidpit.de/de/android/forum/thread/403716/AccountManager-dem-Geheimnis-auf-der-Spur
  * @see http://code.google.com/p/google-api-java-client/wiki/APIs#Google+_API
  * @see https://code.google.com/apis/explorer/#_s=plus&_v=v1
+ * @see http://www.google.com/events/io/2011/sessions/best-practices-for-accessing-google-apis-on-android.html ab 43:50
  * @author clorenz
  * @created on 12.10.2011
  */
 
 public class AuthenticationDemoActivity extends Activity {
+	/**
+	 * @see https://code.google.com/apis/console/b/0/#project:1015729460636:access
+	 */
+	protected static final String API_KEY="AIzaSyCjnmCvE5QEtay35qS";
+	protected static final String CLIENT_ID="1015729460636.apps.googleusercontent.com";
+	protected static final String CLIENT_SECRET="0fet8hDxqG2BdI1ghozeaCQ8";
+	protected static final String REDIRECT_URI="urn:ietf:wg:oauth:2.0:oob";
+	
 	protected static final String TAG="authdemo";
 	/**
 	 * @see http://code.google.com/intl/de/apis/gdata/faq.html#clientlogin
@@ -48,6 +57,7 @@ public class AuthenticationDemoActivity extends Activity {
         System.setProperty("log.tag.*", "ALL");
         
         try {
+        	// TODO: Alternativ: GoogleAccountManager
             AccountManager accountManager = AccountManager.get(this);
             Account[] accounts =
                     accountManager.getAccountsByType("com.google");
@@ -79,12 +89,13 @@ public class AuthenticationDemoActivity extends Activity {
             			 */
             			JsonFactory jsonFactory = new JacksonFactory();
 
-            			//GoogleAccessProtectedResource requestInitializer =
-            			//    new GoogleAccessProtectedResource(token, httpTransport,
-            			//    jsonFactory, "foo", "bar", "knurz");
+            			GoogleAccessProtectedResource requestInitializer =
+            			    new GoogleAccessProtectedResource(token, httpTransport,
+            			    jsonFactory, CLIENT_ID, CLIENT_SECRET, token);
 
-            			Plus plus = new Plus(httpTransport, jsonFactory);
-            			plus.setOauthToken(token);
+            			Plus plus = new Plus(httpTransport, requestInitializer, jsonFactory);
+            			
+            			Log.d(TAG, "plus base server="+plus.getBaseServer());
             			
             			Person profile = plus.people.get("me").execute();
 
